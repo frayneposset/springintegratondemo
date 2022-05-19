@@ -8,7 +8,7 @@ docker run -p 3306:3306  --name mysql -e MYSQL_ROOT_PASSWORD=secret mysql
 create a schema in it called "springintegration"
 run the schema creation script for mysql (mysql.sql)
 
-post a submission to the rest endpoint:
+post a submission to the rest endpoint (you might have to do this a few times to make sure you get a NOT_READY status
 
 curl --location --request POST 'localhost:8080' --header 'Content-Type: application/json' --data-raw '{"delay" : 1000,"submissionId" : "id","status" : "","description" : "description"}'
 
