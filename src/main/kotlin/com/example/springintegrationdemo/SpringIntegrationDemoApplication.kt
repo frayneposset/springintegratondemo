@@ -1,6 +1,5 @@
 package com.example.springintegrationdemo
 
-import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -22,6 +21,7 @@ import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 
+data class Submission(val submissionId : String,val description: String, val delay : Long, val status : String) : Serializable
 @SpringBootApplication
 class SpringIntegrationDemoApplication {
 
@@ -37,14 +37,6 @@ class SpringIntegrationDemoApplication {
 
     @Bean
     fun queryProvider(): ChannelMessageStoreQueryProvider = MySqlChannelMessageStoreQueryProvider()
-
-
-    @Bean
-    fun runner(gateway: SubmissionGateway): ApplicationRunner? {
-        return ApplicationRunner {
-//          gateway.poll(Submission("mySubmissionId", "my submission", 1000L, ""))
-        }
-    }
 }
 
 fun main(args: Array<String>) {
@@ -101,8 +93,7 @@ class SubmissionConfiguration(val channels: ChannelConfiguration) {
     fun poll(input: Submission): Submission {
         val status = if ((0..5).random() == 0) ready else notReady
         println("in polling input is $input, result is $status")
-        input.setStatus(status)
-        return input
+        return input.copy(status=status)
     }
 
 
