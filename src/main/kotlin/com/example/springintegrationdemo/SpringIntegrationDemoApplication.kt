@@ -1,9 +1,13 @@
 package com.example.springintegrationdemo
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.serializer.DefaultDeserializer
+import org.springframework.core.serializer.Deserializer
+import org.springframework.core.serializer.Serializer
 import org.springframework.integration.annotation.MessagingGateway
 import org.springframework.integration.channel.DirectChannel
 import org.springframework.integration.dsl.MessageChannels
@@ -17,6 +21,7 @@ import org.springframework.messaging.Message
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import java.io.InputStream
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
@@ -30,14 +35,26 @@ class SpringIntegrationDemoApplication {
         fun poll(submission: Submission)
     }
 
+
     @Bean
-    fun jdbcChannelMessageStore(dataSource: DataSource): JdbcMessageStore {
-        return JdbcMessageStore(dataSource)
+    fun jdbcChannelMessageStore(dataSource: DataSource,beanFactory: ConfigurableBeanFactory): JdbcMessageStore {
+        val jdbcMessageStore = JdbcMessageStore(dataSource)
+        val deserializer = DefaultDeserializer(beanFactory.beanClassLoader)
+
+
+        jdbcMessageStore.setDeserializer {
+            deserializer.deserialize(it) as Message<*>
+        }
+        return jdbcMessageStore
     }
+
+
+
 
     @Bean
     fun queryProvider(): ChannelMessageStoreQueryProvider = MySqlChannelMessageStoreQueryProvider()
 }
+
 
 fun main(args: Array<String>) {
     runApplication<SpringIntegrationDemoApplication>(*args)
